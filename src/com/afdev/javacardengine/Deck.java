@@ -18,6 +18,11 @@ public class Deck {
         return deck.remove(0);
     }
     
+    // Get specific card and remove it from deck
+    public Card getSpecificCardRemove(int deckPosition){
+        return deck.remove(deckPosition);
+    }
+    
     // Add a card to this deck
     public void addCard(Card card) {
         deck.add(card);
@@ -32,7 +37,22 @@ public class Deck {
     public boolean isDeckEmpty() {
         return this.deck.isEmpty();
     }
+    
+    public void shuffle(){
+        ArrayList <Card> copyDeck = new ArrayList<>(this.deck.size());
+        int size = this.deck.size();
+        for(int i = 0; i < size; i++){
+            int index = rng.nextInt(this.deck.size());
+            copyDeck.add(this.deck.remove(index));
+        }
+        for(Card c: copyDeck){
+            this.deck.add(c);
+        }       
+    }
 
     // All of the cards in this deck represented as a container
     private ArrayList<Card> deck;
+    
+    // The random number generator that will be used for all cards
+    protected static final Random rng = new Random(System.currentTimeMillis());
 }

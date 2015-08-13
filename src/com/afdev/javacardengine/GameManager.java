@@ -33,6 +33,7 @@ public class GameManager implements GameSettingInterface, GameActionInterface {
                 break;
                 
             case WAR:
+                this.ruleset = new WarRuleset();
                 break;
                 
             case GEMWAR:
@@ -199,8 +200,7 @@ public class GameManager implements GameSettingInterface, GameActionInterface {
     
     // Flag which determins if the game is finished
     private boolean isGameOver;
-    
-    
+        
     /* BELOW HERE IS IMPLEMENTATION OF GAMESETTINGINTERFACE */
     // Adds # of players
     @Override
@@ -273,6 +273,17 @@ public class GameManager implements GameSettingInterface, GameActionInterface {
         System.out.println("Deck filled");
     }
     
+    // Fill dealer deck with playing cards
+    @Override
+    public void fillDealerDeckPlayingCards(int deckPosition){
+
+    for(int i = 0; i < 4; i ++){
+            for(int j = 0; j < 13; j ++){
+               this.dealer.addCard(deckPosition, new PlayingCard(i,j));                     
+            }
+        }
+    System.out.println("Deck Filled");
+    }
     // Get a card from the dealer
     @Override
     public Card getCardFromDealer(int deckPosition) {
@@ -284,6 +295,12 @@ public class GameManager implements GameSettingInterface, GameActionInterface {
     public void dealerCreateNewDeck() {
         this.dealer.createNewDeck();
         System.out.println("Dealer deck created");
+    }
+    
+    // Tel the dealer to shuffle all his decks
+    @Override
+    public void dealerShuffleDeck(){
+        this.dealer.shuffleDecks();
     }
     
     // Tell the player to create a new deck
@@ -385,7 +402,7 @@ public class GameManager implements GameSettingInterface, GameActionInterface {
         this.currentAction.addActionReturnValue(plOneCard, 
                 plTwoCard);
     }
-    
+      
     // Check if all players decks are empty and return true/false
     @Override
     public boolean checkAllDecksEmpty(int plDeckPosition) {
@@ -415,6 +432,256 @@ public class GameManager implements GameSettingInterface, GameActionInterface {
                     this.players.get(1));
         }
     }
-    /* END OF IMPLEMENTATION OF GAMEACTIONINTERFACE */
-}
+     // Called when war game ends
+    
+    //SPECIFIC GAMEACTIONs for WAR RULE SET
+    
+    // Compare two playing cards to determine which one is of a higher value
+    @Override
+    public PlayingCard comparePlayingCards(PlayingCard cardOne, PlayingCard cardTwo){
+        if(cardOne.getRank().ordinal() > cardTwo.getRank().ordinal()){
+            return cardOne;
+        }
+        else if(cardTwo.getRank().ordinal() > cardOne.getRank().ordinal()){
+            return cardTwo;
+        }
+        else {
+            return null;
+        }
+    }
+    
+    // Get a card from each player and compare them give a card to player
+    // with higher card
+    @Override
+    public void warGameComparison(int playerOne, int playerTwo, 
+            int plDeckPosition) {
+        
+        // Checks to see if main playing deck is empty
+        // if it is, it fills main playing deck with cards from discard pile
+        if(this.checkPlayerPlayingDeck(plDeckPosition, playerOne)){
+            this.transferFromDiscard(plDeckPosition, playerOne);
+        }
+        if(this.checkPlayerPlayingDeck(plDeckPosition, playerTwo)){
+            this.transferFromDiscard(plDeckPosition, playerTwo);
+        }
+        
+        //Get player one and player twos card and compares to see which one is larger
+        PlayingCard plOneCard = (PlayingCard) this.getPlayerCard(playerOne,
+                plDeckPosition);
+        PlayingCard plTwoCard = (PlayingCard) this.getPlayerCard(playerTwo, 
+                plDeckPosition);
+        PlayingCard higherCard = (PlayingCard) this.comparePlayingCards(plOneCard,
+                plTwoCard);
+        
+        // See who owned that card and distribute cards accordingly or initialize
+        // the war flag
+        if (higherCard == plOneCard) {
+         this.giveCardToPlayer(plTwoCard, playerOne, plDeckPosition+1);
+         this.giveCardToPlayer(plOneCard, playerOne, plDeckPosition+1);
+         // Add return values to current game action
+         this.currentAction.addActionReturnValue(plOneCard, 
+               plTwoCard);
+        }
+        else if (higherCard == plTwoCard) {
+         this.giveCardToPlayer(plTwoCard, playerTwo, plDeckPosition+1);
+         this.giveCardToPlayer(plOneCard, playerTwo, plDeckPosition+1); 
+         // Add return values to current game action
+         this.currentAction.addActionReturnValue(plOneCard, 
+               plTwoCard);
+        }
+        else{
+            this.war(playerOne, playerTwo, plDeckPosition, plOneCard, plTwoCard);
+        }
+                
 
+             
+    }
+    
+    // called when both player cards equal each other
+    @Override
+    public void war(int playerOne, int playerTwo, int plDeckPosition, 
+            PlayingCard plOne, PlayingCard plTwo){
+               
+           //check to see if any player has run out of cards
+           if(this.checkOnePlayerDecksEmpty(plDeckPosition)){
+               
+               // if a player has run out of cards have the player who has cards
+               // win war and give them the cards
+               if(!this.checkPlayerPlayingDeck(plDeckPosition, playerTwo)){
+                   this.giveCardToPlayer(plTwo, playerTwo, plDeckPosition+1);
+                   this.giveCardToPlayer(plOne, playerTwo, plDeckPosition+1);
+               }
+               else{
+                   this.giveCardToPlayer(plTwo, playerOne, plDeckPosition+1);
+                   this.giveCardToPlayer(plOne, playerOne, plDeckPosition+1);
+               }
+               this.currentAction.addActionReturnValue(plOne, plTwo);
+           }
+
+           else{
+           
+           // set a war flag to true, and add it to the action return values
+           boolean hasWarOccured = true;    
+           this.currentAction.addActionReturnValue(plOne, plTwo, hasWarOccured);
+           
+           // initialize variables that will hold the playing cards that will
+           // be inserted into an array   
+           PlayingCard plOneCard;
+           PlayingCard plTwoCard;
+           
+           // create an array of PlayingCards that will hold the cards
+           // that will be won by the winner of the war and array of cards to return
+           // to acction return values
+           ArrayList<PlayingCard> returnOneCards = new ArrayList<>();
+           ArrayList<PlayingCard> returnTwoCards = new ArrayList<>();
+           ArrayList<PlayingCard> plOneCards = new ArrayList<>();
+           ArrayList<PlayingCard> plTwoCards = new ArrayList<>();
+           
+           // add the cards that triggered the war to the array of cards that
+           // will be given to the winner of the war
+           plOneCards.add(plOne);           
+           plTwoCards.add(plTwo);          
+          
+           // transfer cards from discard to deck if discard pile has cards
+           if(!this.checkPlayerPlayingDeck(plDeckPosition+1, 
+                           playerOne)){
+               this.transferFromDiscard(plDeckPosition, playerOne);
+           }
+           if(!this.checkPlayerPlayingDeck(plDeckPosition+1, 
+                           playerTwo)){
+               this.transferFromDiscard(plDeckPosition, playerTwo);
+           } 
+           
+           // initialize length of war
+           int lengthOfWar = 4;
+           // add cards used in war into the arraylist of cards to be returned
+           // to winner, and to the action return values
+           for(int i = 0; i < lengthOfWar; i++){
+               plOneCard = (PlayingCard)this.getPlayerCard(playerOne,
+                       plDeckPosition);
+               plTwoCard = (PlayingCard)this.getPlayerCard(playerTwo,
+                       plDeckPosition);
+               returnOneCards.add(plOneCard);
+               returnTwoCards.add(plTwoCard);
+               plOneCards.add(plOneCard);
+               plTwoCards.add(plTwoCard);
+               if(this.checkOnePlayerDecksEmpty(plDeckPosition)){
+                   this.currentAction.addActionReturnValue(returnOneCards, 
+                           returnTwoCards);
+                   break;
+               }
+               if(i == lengthOfWar - 1){
+                   if(this.comparePlayingCards(returnOneCards.get(
+                           returnOneCards.size() - 1),
+                           returnTwoCards.get(returnTwoCards.size() - 1)) 
+                           == null){
+                       this.currentAction.addActionReturnValue(returnOneCards,
+                               returnTwoCards, hasWarOccured);
+                       returnOneCards.clear();
+                       returnTwoCards.clear();
+                       lengthOfWar += 3;
+                   }
+                   else{
+                       this.currentAction.addActionReturnValue(returnOneCards,
+                               returnTwoCards);
+                   }
+               }
+           } 
+
+           // Compare the two player cards
+           PlayingCard higherCard =  this.comparePlayingCards(
+                           plOneCards.get(plOneCards.size() -1),
+                           plTwoCards.get(plTwoCards.size() -1));
+           
+         // See who owned that card and distribute cards accordingly or initialize
+        if (higherCard == plOneCards.get(plOneCards.size() -1)) {
+            for(PlayingCard p : plTwoCards){
+                this.giveCardToPlayer(p, playerOne, plDeckPosition+1);                
+            }
+            for(PlayingCard p : plOneCards){
+                this.giveCardToPlayer(p, playerOne, plDeckPosition+1);                
+            }
+        }
+        else if (higherCard == plTwoCards.get(plTwoCards.size() -1)) {
+            for(PlayingCard p : plOneCards){
+                this.giveCardToPlayer(p, playerTwo, plDeckPosition+1);                
+            }
+            for(PlayingCard p : plTwoCards){
+                this.giveCardToPlayer(p, playerTwo, plDeckPosition+1);                
+            }
+        }
+        else{
+            if(!this.checkPlayerPlayingDeck(plDeckPosition, playerTwo)){
+                for(PlayingCard p : plOneCards){
+                    this.giveCardToPlayer(p, playerTwo, plDeckPosition+1);                
+                }
+                for(PlayingCard p : plTwoCards){
+                    this.giveCardToPlayer(p, playerTwo, plDeckPosition+1);                
+                }
+            }
+            else{
+                for(PlayingCard p : plTwoCards){
+                    this.giveCardToPlayer(p, playerOne, plDeckPosition+1);                
+                 }
+                for(PlayingCard p : plOneCards){
+                    this.giveCardToPlayer(p, playerOne, plDeckPosition+1);                
+                }
+            }
+        }
+        }
+        }
+   
+    //Check if specific player deck is empty
+    @Override
+    public boolean checkPlayerPlayingDeck(int plDeckPosition, int player){
+        // is current deck empty
+        boolean flag = true;
+
+        if(!this.players.get(player).isDeckEmpty(plDeckPosition)){
+                flag = false;
+            }
+        return flag;
+    }
+        
+    //transfer discard deck to playing deck
+    @Override
+    public void transferFromDiscard(int plDeckPosition, int player){
+        PlayingCard card;
+        for(int i = 0; i < 
+                this.players.get(player).getDeck(plDeckPosition+1).getDeckSize();
+                i++){
+            card = (PlayingCard) this.getPlayerCard(player, plDeckPosition+1);
+            this.giveCardToPlayer(card, player, plDeckPosition);
+        }                               
+    }
+    
+     // Check if a player has both decks empty and return true/false
+    @Override
+    public boolean checkOnePlayerDecksEmpty(int plDeckPosition){
+        // Is there one player with two empty decks
+        boolean flag = false;
+        
+        //Loop through all decks at deck position for each player
+        for(Player player : this.players){
+            if(player.isDeckEmpty(plDeckPosition) && 
+                    player.isDeckEmpty(plDeckPosition+1)){
+                flag = true;
+            }
+        }
+        return flag;
+    }
+    
+    // Called when war game is over
+    @Override
+    public void checkWarGameOver(){
+        if(this.checkOnePlayerDecksEmpty(0)){
+            // Set gameOver flag to true
+            this.isGameOver = true;            
+           
+        }
+        
+    }
+        
+    /* END OF IMPLEMENTATION OF GAMEACTIONINTERFACE */
+      
+}

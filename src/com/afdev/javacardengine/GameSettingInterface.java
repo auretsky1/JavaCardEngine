@@ -4,7 +4,7 @@ public interface GameSettingInterface {
     // GameSettingInterface contains all of the actions that can be taken
     // by a setting when initializing any specific game type
     
-    // Adds # of players
+     // Adds # of players
     void addPlayers(int numberOfPlayers);
     
     // Add a players
@@ -16,6 +16,9 @@ public interface GameSettingInterface {
     // Give dealer a deck
     void giveDealerDeck(Deck deck);
     
+    // Tell dealer to shuffle deck
+    void dealerShuffleDeck();
+    
     // Distribute cards evenly from dealer to players
     void distributeDeckToPlayers(int deckPosition, int plDeckPosition);
     
@@ -25,7 +28,9 @@ public interface GameSettingInterface {
     
     // Fill dealers deck with # cards
     void fillDealerDeck(int numberOfCards, int deckPosition);
-    
+
+    // Fill dealer deck with playing cards
+    void fillDealerDeckPlayingCards(int deckPosition);
     // Get a card from the dealer
     Card getCardFromDealer(int deckPosition);
     

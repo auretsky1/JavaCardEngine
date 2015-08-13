@@ -22,6 +22,10 @@ public class Player {
         decks.add(new Deck());
     }
     
+    // Accessor for player deck
+    public Deck getDeck(int deckPosition){
+        return decks.get(deckPosition);
+    }
     // Check if a deck at specified position is empty
     public boolean isDeckEmpty(int deckPosition) {
         return this.decks.get(deckPosition).isDeckEmpty();

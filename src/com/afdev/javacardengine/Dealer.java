@@ -50,6 +50,12 @@ public class Dealer {
         return this.decks.get(deckPosition).getDeckSize();
     }
     
+    public void shuffleDecks(){
+        for(Deck deck: this.decks){
+            deck.shuffle();
+        }
+    }
+    
     // Collection of decks that the dealer can deal from
     private ArrayList<Deck> decks;
 }

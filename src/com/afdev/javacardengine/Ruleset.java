@@ -32,7 +32,7 @@ public class Ruleset {
     }
     
     // Method which initializes the method map for the game settings interface
-    private void initializeMethodMapSettings() {
+    protected void initializeMethodMapSettings() {
         // Create an unitialized collection of generic class objects to be
         // used for specifying the parameters of each method
         Class<?>[] parameters;
@@ -55,7 +55,7 @@ public class Ruleset {
     }
     
     // Method which initializes the method map for the game actions interface
-    private void initializeMethodMapActions() {
+    protected void initializeMethodMapActions() {
         // Create an unitialized collection of generic class objects to be
         // used for specifying the parameters of each method
         Class<?>[] parameters;
@@ -78,7 +78,7 @@ public class Ruleset {
     }
     
     // Method which calls both init methods for interface maps
-    private void initializeAllMethodMaps() {
+    protected void initializeAllMethodMaps() {
         this.initializeMethodMapSettings();
         this.initializeMethodMapActions();
     }
@@ -94,7 +94,7 @@ public class Ruleset {
     }
     
     // Create all the default settings for this game type (default game) 
-    private void createAllGameSettings() {
+    protected void createAllGameSettings() {
         // Create individual settings and add them to the settings collection
         // Begin by creating two players for the game
         Setting setting = this.createSetting("NULL", SettingType.STATIC, 2);
@@ -120,7 +120,7 @@ public class Ruleset {
     }
     
     // Create all the game actions that will occur during a single turn
-    private void createTurnGameActions() {
+    protected void createTurnGameActions() {
         // Create individual gameActions and add them to the turn collection
         // Begin by creating two players for the game
         GameAction gameAction = new GameAction(0, 1, 0, 0);
@@ -134,7 +134,7 @@ public class Ruleset {
     }
     
     // Internal method for initializing a setting
-    private Setting createSetting(String label, Setting.SettingType setType,
+    protected Setting createSetting(String label, Setting.SettingType setType,
             Object ... values) {
         // Construct the setting with the specificed label/setType
         Setting setting = new Setting(label, setType);
@@ -149,7 +149,7 @@ public class Ruleset {
     }
     
     // Internal method for adding interface method calls to settings
-    private void addMethodsToSettings(Setting setting, String ... methods) {
+    protected void addMethodsToSettings(Setting setting, String ... methods) {
         // Loop through all provided strings and add them as methods to setting
         for (String method : methods) {
             setting.addMethod(method);
@@ -157,7 +157,7 @@ public class Ruleset {
     }
     
     // Internal method for adding interface method calls to settings
-    private void addMethodsToGameAction(GameAction gameAction, String ... methods) {
+    protected void addMethodsToGameAction(GameAction gameAction, String ... methods) {
         // Loop through all provided strings and add them as methods to setting
         for (String method : methods) {
             gameAction.addMethod(method);
@@ -165,16 +165,14 @@ public class Ruleset {
     }    
     
     // A list of settings to be displayed by the transducer
-    private final ArrayList<Setting> settings = new ArrayList<>();
+    protected final ArrayList<Setting> settings = new ArrayList<>();
     
     // A list of gameActions to be performed during each turn
-    private final ArrayList<GameAction> turnActions = new ArrayList<>();
+    protected final ArrayList<GameAction> turnActions = new ArrayList<>();
     
     // A map that maps methods in the GameSettingInterface to their strings
-    private final Map<String, Class<?>[]> methodMapSettings = new HashMap<>();
+    protected final Map<String, Class<?>[]> methodMapSettings = new HashMap<>();
     
     // A map that maps methods in the GameActionInterface to their strings
-    private final Map<String, Class<?>[]> methodMapGameActions = new HashMap<>();
-    
-    // Commit test
+    protected final Map<String, Class<?>[]> methodMapGameActions = new HashMap<>();
 }

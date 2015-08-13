@@ -20,8 +20,8 @@ public class Card {
     }
     
     // An integer value that determins if the base card is 0 or 1
-    private int cardValue;
+    protected int cardValue;
  
     // The random number generator that will be used for all cards
-    private static final Random rng = new Random(System.currentTimeMillis());
+    protected static final Random rng = new Random(System.currentTimeMillis());
 }
