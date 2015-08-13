@@ -175,4 +175,6 @@ public class Ruleset {
     
     // A map that maps methods in the GameActionInterface to their strings
     private final Map<String, Class<?>[]> methodMapGameActions = new HashMap<>();
+    
+    // Commit test
 }
