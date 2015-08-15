@@ -67,4 +67,5 @@ public class Player {
         // Set the value to the new value
         this.values.set(valuePosition, currentValue);
     }
+    
 }
